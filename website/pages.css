@@ -1,0 +1,667 @@
+/* ============================================================
+   CLARICITO — INNER PAGES STYLESHEET (pages.css)
+   Shared across: About · Philosophy · Privacy · Terms
+   Imports and extends the main styles.css design system
+   ============================================================ */
+
+/* ---- Nav active state ---- */
+.nav-active {
+  color: var(--gold) !important;
+}
+
+/* ---- Page Hero ---- */
+.page-hero {
+  position: relative;
+  min-height: 52vh;
+  display: flex;
+  align-items: flex-end;
+  padding: calc(var(--nav-height) + 80px) 0 80px;
+  overflow: hidden;
+  background: var(--bg);
+}
+.page-hero-bg {
+  position: absolute;
+  inset: 0;
+}
+.page-hero-content {
+  position: relative;
+  z-index: 2;
+  max-width: 820px;
+}
+.page-breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.75rem;
+  color: var(--text-faint);
+  letter-spacing: 0.08em;
+  margin-bottom: 1.8rem;
+}
+.page-breadcrumb a {
+  color: var(--text-faint);
+  transition: color var(--transition);
+}
+.page-breadcrumb a:hover { color: var(--gold); }
+.page-breadcrumb span { color: var(--text-faint); }
+
+.page-title {
+  font-family: var(--font-display);
+  font-size: clamp(2.2rem, 5vw, 3.8rem);
+  font-weight: 300;
+  line-height: 1.15;
+  letter-spacing: -0.01em;
+  color: var(--text);
+  margin-bottom: 1.2rem;
+}
+.page-title em {
+  font-style: italic;
+  color: var(--gold);
+}
+.page-title-lg {
+  font-size: clamp(1.8rem, 4vw, 3rem);
+}
+.page-subtitle {
+  font-size: 1.05rem;
+  color: var(--text-muted);
+  line-height: 1.8;
+  max-width: 640px;
+  margin-bottom: 0;
+}
+
+/* Photo hero variant */
+.page-hero-photo {
+  background-size: cover;
+  background-position: center 35%;
+}
+.page-hero-photo-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    105deg,
+    rgba(10, 10, 10, 0.96) 0%,
+    rgba(10, 10, 10, 0.88) 45%,
+    rgba(10, 10, 10, 0.60) 75%,
+    rgba(10, 10, 10, 0.3) 100%
+  );
+  z-index: 1;
+}
+
+/* Legal hero variant — slightly taller, gold accent line */
+.page-hero-legal {
+  min-height: 36vh;
+  border-bottom: 1px solid var(--gold-border);
+}
+.legal-meta {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-size: 0.75rem;
+  color: var(--text-faint);
+  margin-top: 1.2rem;
+  letter-spacing: 0.06em;
+}
+
+/* ---- Page Main ---- */
+.page-main {
+  background: var(--bg);
+  padding: 0 0 80px;
+}
+.page-container {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 80px 40px;
+}
+.page-container-legal {
+  max-width: 860px;
+  margin: 0 auto;
+  padding: 60px 40px 80px;
+  display: grid;
+  grid-template-columns: 220px 1fr;
+  gap: 4rem;
+  align-items: start;
+}
+
+/* ---- Page Sections ---- */
+.page-section {
+  margin-bottom: 0;
+}
+.page-section-centered {
+  text-align: center;
+}
+.page-section-label {
+  font-family: var(--font-body);
+  font-size: 0.7rem;
+  font-weight: 500;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-bottom: 1rem;
+}
+.page-section h2 {
+  font-family: var(--font-display);
+  font-size: clamp(1.8rem, 3.5vw, 2.8rem);
+  font-weight: 300;
+  line-height: 1.2;
+  color: var(--text);
+  margin-bottom: 1.4rem;
+  letter-spacing: -0.01em;
+}
+.page-section h2 em {
+  font-style: italic;
+  color: var(--gold);
+}
+.page-section p {
+  font-size: 0.97rem;
+  color: var(--text-muted);
+  line-height: 1.85;
+  margin-bottom: 1rem;
+  max-width: 680px;
+}
+.page-section-centered p {
+  margin-left: auto;
+  margin-right: auto;
+}
+.page-lead {
+  font-size: 1.05rem !important;
+  color: var(--text-muted);
+  line-height: 1.85;
+  max-width: 720px;
+  margin: 0 auto 1.2rem !important;
+}
+
+/* ---- Dividers ---- */
+.page-divider {
+  height: 1px;
+  background: var(--border);
+  margin: 5rem 0;
+  position: relative;
+}
+.page-divider::after {
+  content: '◆';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: var(--bg);
+  color: var(--gold-border);
+  font-size: 0.7rem;
+  padding: 0 1rem;
+}
+.page-divider-sm {
+  height: 1px;
+  background: var(--border);
+  margin: 3rem auto;
+  max-width: 200px;
+}
+
+/* ---- Split layout ---- */
+.page-section-split {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4rem;
+  align-items: start;
+  margin-top: 2rem;
+}
+.page-section-copy h2 {
+  font-family: var(--font-display);
+  font-size: clamp(1.5rem, 2.5vw, 2.2rem);
+  font-weight: 300;
+  line-height: 1.25;
+  color: var(--text);
+  margin-bottom: 1.2rem;
+}
+.page-section-copy h2 em { color: var(--gold); font-style: italic; }
+.page-section-copy p {
+  font-size: 0.95rem;
+  color: var(--text-muted);
+  line-height: 1.85;
+  margin-bottom: 1rem;
+  max-width: none;
+}
+
+/* ---- Aside card ---- */
+.aside-card {
+  background: var(--bg-card);
+  border: 1px solid var(--gold-border);
+  border-radius: var(--radius);
+  padding: 2rem;
+  position: sticky;
+  top: calc(var(--nav-height) + 24px);
+}
+.aside-card-icon {
+  font-size: 1.4rem;
+  color: var(--gold);
+  margin-bottom: 1.2rem;
+}
+.aside-card blockquote {
+  font-family: var(--font-display);
+  font-size: 1.15rem;
+  font-weight: 300;
+  font-style: italic;
+  color: var(--text);
+  line-height: 1.6;
+  margin-bottom: 1rem;
+}
+.aside-card blockquote em { color: var(--gold); }
+.aside-card cite {
+  font-size: 0.78rem;
+  color: var(--text-faint);
+  letter-spacing: 0.06em;
+}
+
+/* ---- Aside photo ---- */
+.aside-photo-frame {
+  position: relative;
+  border-radius: var(--radius);
+  overflow: hidden;
+  aspect-ratio: 3 / 4;
+  border: 1px solid var(--gold-border);
+}
+.aside-photo-frame img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center top;
+  display: block;
+  transition: transform 0.8s ease;
+}
+.aside-photo-frame:hover img { transform: scale(1.03); }
+.aside-photo-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to bottom, transparent 55%, rgba(10,10,10,0.6) 100%);
+  pointer-events: none;
+}
+
+/* ---- Pillars grid ---- */
+.page-pillars-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1px;
+  background: var(--border);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  margin-top: 3rem;
+  text-align: left;
+}
+.page-pillar {
+  background: var(--bg-card);
+  padding: 2rem;
+  transition: background var(--transition);
+}
+.page-pillar:hover { background: #161616; }
+.page-pillar-icon {
+  font-size: 1.4rem;
+  color: var(--gold);
+  margin-bottom: 1rem;
+}
+.page-pillar h3 {
+  font-family: var(--font-display);
+  font-size: 1.15rem;
+  font-weight: 400;
+  color: var(--text);
+  margin-bottom: 0.6rem;
+  line-height: 1.3;
+}
+.page-pillar p {
+  font-size: 0.87rem;
+  color: var(--text-muted);
+  line-height: 1.75;
+  max-width: none !important;
+  margin: 0;
+}
+
+/* ---- Values row ---- */
+.page-values-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.8rem;
+  margin-top: 1.8rem;
+}
+.page-value {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  padding: 6px 14px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-pill);
+}
+.page-value span { color: var(--gold); font-size: 0.55rem; }
+
+/* ---- Commitment grid (About) ---- */
+.commitment-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1.5rem;
+  margin-top: 3rem;
+  text-align: left;
+}
+.commitment-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 2rem;
+  transition: var(--transition);
+}
+.commitment-card:hover { border-color: var(--gold-border); }
+.commitment-num {
+  font-family: var(--font-display);
+  font-size: 2rem;
+  font-weight: 300;
+  color: var(--gold-border);
+  line-height: 1;
+  margin-bottom: 0.8rem;
+}
+.commitment-card h4 {
+  font-family: var(--font-display);
+  font-size: 1.2rem;
+  font-weight: 400;
+  color: var(--text);
+  margin-bottom: 0.6rem;
+}
+.commitment-card p {
+  font-size: 0.88rem;
+  color: var(--text-muted);
+  line-height: 1.8;
+  max-width: none !important;
+  margin: 0;
+}
+
+/* ---- Philosophy beliefs ---- */
+.philosophy-belief {
+  display: grid;
+  grid-template-columns: 80px 1fr;
+  gap: 2rem;
+  align-items: start;
+  padding: 2.5rem 0;
+  border-bottom: 1px solid var(--border);
+}
+.philosophy-belief:last-child { border-bottom: none; }
+.philosophy-belief-num {
+  font-family: var(--font-display);
+  font-size: 3rem;
+  font-weight: 300;
+  color: var(--gold-border);
+  line-height: 1;
+  padding-top: 0.3rem;
+}
+.philosophy-belief-body h3 {
+  font-family: var(--font-display);
+  font-size: 1.4rem;
+  font-weight: 400;
+  color: var(--text);
+  margin-bottom: 0.8rem;
+  line-height: 1.3;
+}
+.philosophy-belief-body p {
+  font-size: 0.95rem;
+  color: var(--text-muted);
+  line-height: 1.85;
+  margin-bottom: 0.8rem;
+  max-width: none !important;
+}
+.philosophy-belief-body p:last-child { margin-bottom: 0; }
+
+/* ---- Philosophy compare table ---- */
+.philosophy-compare {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1px;
+  background: var(--border);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  position: sticky;
+  top: calc(var(--nav-height) + 24px);
+}
+.phc-col {
+  padding: 1.5rem;
+}
+.phc-bad { background: var(--bg-card); }
+.phc-good {
+  background: linear-gradient(135deg, #141210, #111111);
+  border-left: 1px solid var(--gold-border);
+}
+.phc-label {
+  font-size: 0.65rem;
+  font-weight: 500;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--text-faint);
+  margin-bottom: 1rem;
+}
+.phc-good .phc-label { color: var(--gold); }
+.phc-col ul { list-style: none; }
+.phc-col li {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  padding: 0.5rem 0;
+  border-bottom: 1px solid var(--border);
+  line-height: 1.5;
+}
+.phc-col li:last-child { border-bottom: none; }
+.phc-bad li { opacity: 0.5; text-decoration: line-through; text-decoration-color: rgba(255,255,255,0.15); }
+.phc-good li { color: var(--text); }
+
+/* ---- CTA section ---- */
+.page-cta-section {
+  text-align: center;
+  padding: 5rem 0 0;
+}
+.page-cta-inner {
+  background: var(--gold-dim);
+  border: 1px solid var(--gold-border);
+  border-radius: var(--radius);
+  padding: 4rem;
+}
+.page-cta-inner h2 {
+  font-family: var(--font-display);
+  font-size: clamp(2rem, 4vw, 3rem);
+  font-weight: 300;
+  color: var(--text);
+  margin-bottom: 1rem;
+  line-height: 1.2;
+}
+.page-cta-inner h2 em { color: var(--gold); font-style: italic; }
+.page-cta-inner p {
+  font-size: 1rem;
+  color: var(--text-muted);
+  margin-bottom: 2rem;
+  line-height: 1.7;
+}
+
+/* ---- Legal TOC ---- */
+.legal-toc {
+  position: sticky;
+  top: calc(var(--nav-height) + 24px);
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1.5rem;
+  align-self: start;
+}
+.legal-toc h3 {
+  font-family: var(--font-body);
+  font-size: 0.65rem;
+  font-weight: 500;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-bottom: 1rem;
+}
+.legal-toc ol {
+  list-style: none;
+  counter-reset: toc;
+  padding: 0;
+}
+.legal-toc li {
+  counter-increment: toc;
+  margin-bottom: 0.4rem;
+}
+.legal-toc a {
+  font-size: 0.8rem;
+  color: var(--text-faint);
+  line-height: 1.5;
+  transition: color var(--transition);
+  display: block;
+}
+.legal-toc a:hover { color: var(--gold); }
+
+/* ---- Legal body ---- */
+.legal-body { min-width: 0; }
+.legal-section {
+  padding-bottom: 3rem;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 3rem;
+}
+.legal-section:last-child { border-bottom: none; margin-bottom: 0; }
+.legal-section h2 {
+  font-family: var(--font-display);
+  font-size: 1.6rem;
+  font-weight: 400;
+  color: var(--text);
+  margin-bottom: 1rem;
+  line-height: 1.3;
+  scroll-margin-top: calc(var(--nav-height) + 24px);
+}
+.legal-section h3 {
+  font-family: var(--font-body);
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--text);
+  margin: 1.5rem 0 0.6rem;
+  letter-spacing: 0.03em;
+}
+.legal-section p {
+  font-size: 0.92rem;
+  color: var(--text-muted);
+  line-height: 1.85;
+  margin-bottom: 0.8rem;
+  max-width: none !important;
+}
+.legal-section ul {
+  padding-left: 0;
+  margin: 0.8rem 0;
+}
+.legal-section ul li {
+  font-size: 0.92rem;
+  color: var(--text-muted);
+  line-height: 1.8;
+  padding: 0.3rem 0 0.3rem 1.2rem;
+  position: relative;
+}
+.legal-section ul li::before {
+  content: '—';
+  position: absolute;
+  left: 0;
+  color: var(--gold-border);
+  font-size: 0.8rem;
+}
+.legal-section a {
+  color: var(--gold);
+  border-bottom: 1px solid var(--gold-border);
+  transition: border-color var(--transition);
+}
+.legal-section a:hover { border-color: var(--gold); }
+
+/* Privacy promise cards */
+.legal-promise-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+  margin: 1.5rem 0;
+}
+.legal-promise-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 1.5rem;
+  transition: var(--transition);
+}
+.legal-promise-card:hover { border-color: var(--gold-border); }
+.lpc-icon { color: var(--gold); font-size: 0.8rem; margin-bottom: 0.6rem; }
+.legal-promise-card strong {
+  display: block;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--text);
+  margin-bottom: 0.5rem;
+}
+.legal-promise-card p {
+  font-size: 0.83rem !important;
+  color: var(--text-muted);
+  line-height: 1.7;
+  margin: 0 !important;
+}
+
+/* Legal callout (Terms "not therapy" box) */
+.legal-callout {
+  background: var(--gold-dim);
+  border: 1px solid var(--gold-border);
+  border-left: 3px solid var(--gold);
+  border-radius: var(--radius-sm);
+  padding: 1.5rem 1.8rem;
+  margin: 1rem 0;
+}
+.legal-callout p {
+  font-size: 0.9rem !important;
+  color: var(--text-muted);
+  line-height: 1.8;
+  margin-bottom: 0.6rem !important;
+}
+.legal-callout p:last-child { margin-bottom: 0 !important; }
+.legal-callout strong { color: var(--text); }
+
+/* Contact block */
+.legal-contact {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+  margin-top: 1rem;
+  padding: 1.5rem;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+}
+.legal-contact-item {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+}
+.legal-contact-item strong {
+  font-size: 0.82rem;
+  font-weight: 500;
+  color: var(--text);
+  min-width: 140px;
+  flex-shrink: 0;
+}
+.legal-contact-item a {
+  font-size: 0.85rem;
+  color: var(--gold) !important;
+  border-bottom: 1px solid var(--gold-border) !important;
+}
+
+/* ---- Responsive ---- */
+@media (max-width: 1024px) {
+  .page-section-split { grid-template-columns: 1fr; gap: 2.5rem; }
+  .page-pillars-grid { grid-template-columns: repeat(2, 1fr); }
+  .commitment-grid { grid-template-columns: 1fr; }
+  .page-container-legal { grid-template-columns: 1fr; }
+  .legal-toc { position: static; margin-bottom: 2rem; }
+  .philosophy-compare { position: static; }
+}
+@media (max-width: 768px) {
+  .page-container { padding: 60px 24px; }
+  .page-container-legal { padding: 40px 24px 60px; }
+  .page-pillars-grid { grid-template-columns: 1fr; }
+  .legal-promise-grid { grid-template-columns: 1fr; }
+  .philosophy-belief { grid-template-columns: 1fr; gap: 0.5rem; }
+  .philosophy-belief-num { font-size: 2rem; }
+  .philosophy-compare { grid-template-columns: 1fr; }
+  .page-cta-inner { padding: 2.5rem 1.5rem; }
+  .legal-contact-item { flex-direction: column; align-items: flex-start; gap: 0.2rem; }
+  .aside-photo-frame { aspect-ratio: 16 / 9; }
+}

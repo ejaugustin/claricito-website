@@ -1,0 +1,236 @@
+name: Deploy Claricito Website
+
+# ============================================================
+# Triggers: auto-deploy on push to main; manual deploy option
+# ============================================================
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'website/**'
+      - '.github/workflows/deploy-website.yml'
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Deployment target'
+        required: true
+        default: 'production'
+        type: choice
+        options:
+          - production
+          - staging
+      invalidate_cache:
+        description: 'Force full CloudFront cache invalidation'
+        required: false
+        default: 'false'
+        type: boolean
+
+# ============================================================
+# PERMISSIONS — OIDC-based, no long-lived credentials
+# ============================================================
+permissions:
+  id-token: write
+  contents: read
+
+# ============================================================
+# ENVIRONMENT VARIABLES
+# ============================================================
+env:
+  NODE_VERSION: '18'
+  AWS_REGION: us-east-1
+
+# ============================================================
+# JOBS
+# ============================================================
+jobs:
+
+  # ----------------------------------------------------------
+  # JOB 1: Validate & Lint
+  # ----------------------------------------------------------
+  validate:
+    name: Validate Website
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Validate HTML
+        run: |
+          npx --yes html-validate website/index.html || echo "HTML validation warnings noted"
+
+      - name: Check CSS file exists
+        run: |
+          test -f website/styles.css && echo "✅ styles.css found" || (echo "❌ styles.css missing" && exit 1)
+
+      - name: Check JS file exists
+        run: |
+          test -f website/app.js && echo "✅ app.js found" || (echo "❌ app.js missing" && exit 1)
+
+  # ----------------------------------------------------------
+  # JOB 2: Deploy to AWS
+  # ----------------------------------------------------------
+  deploy:
+    name: Deploy to S3 + CloudFront
+    runs-on: ubuntu-latest
+    needs: validate
+    environment:
+      name: ${{ github.event.inputs.environment || 'production' }}
+      url: ${{ steps.get-url.outputs.website_url }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # Configure AWS credentials via OIDC (no stored secrets needed)
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_DEPLOY_ROLE_ARN }}
+          role-session-name: ClaricitoWebsiteDeploy
+          aws-region: ${{ env.AWS_REGION }}
+
+      # Set environment-specific variables
+      - name: Set environment variables
+        id: env-vars
+        run: |
+          if [ "${{ github.event.inputs.environment }}" = "staging" ]; then
+            echo "BUCKET_NAME=${{ secrets.STAGING_BUCKET_NAME }}" >> $GITHUB_ENV
+            echo "DISTRIBUTION_ID=${{ secrets.STAGING_DISTRIBUTION_ID }}" >> $GITHUB_ENV
+            echo "WEBSITE_URL=https://staging.claricito.com" >> $GITHUB_ENV
+          else
+            echo "BUCKET_NAME=${{ secrets.PRODUCTION_BUCKET_NAME }}" >> $GITHUB_ENV
+            echo "DISTRIBUTION_ID=${{ secrets.PRODUCTION_DISTRIBUTION_ID }}" >> $GITHUB_ENV
+            echo "WEBSITE_URL=https://claricito.com" >> $GITHUB_ENV
+          fi
+
+      # Sync HTML files with short cache TTL
+      - name: Upload HTML files (short cache)
+        run: |
+          aws s3 sync website/ s3://${{ env.BUCKET_NAME }}/ \
+            --exclude "*" \
+            --include "*.html" \
+            --cache-control "public, max-age=300, s-maxage=300" \
+            --content-type "text/html; charset=utf-8" \
+            --delete \
+            --metadata-directive REPLACE
+
+      # Sync CSS with long cache TTL (cache-busted by versioning)
+      - name: Upload CSS files (long cache)
+        run: |
+          aws s3 sync website/ s3://${{ env.BUCKET_NAME }}/ \
+            --exclude "*" \
+            --include "*.css" \
+            --cache-control "public, max-age=31536000, immutable" \
+            --content-type "text/css" \
+            --metadata-directive REPLACE
+
+      # Sync JS with long cache TTL
+      - name: Upload JavaScript files (long cache)
+        run: |
+          aws s3 sync website/ s3://${{ env.BUCKET_NAME }}/ \
+            --exclude "*" \
+            --include "*.js" \
+            --cache-control "public, max-age=31536000, immutable" \
+            --content-type "application/javascript" \
+            --metadata-directive REPLACE
+
+      # Sync images and other assets
+      - name: Upload images and assets
+        run: |
+          aws s3 sync website/ s3://${{ env.BUCKET_NAME }}/ \
+            --exclude "*.html" \
+            --exclude "*.css" \
+            --exclude "*.js" \
+            --cache-control "public, max-age=2592000" \
+            --delete
+
+      # Invalidate CloudFront cache
+      - name: Invalidate CloudFront cache
+        id: invalidate
+        run: |
+          if [ "${{ github.event.inputs.invalidate_cache }}" = "true" ]; then
+            PATHS="/*"
+            echo "Full cache invalidation requested"
+          else
+            PATHS="/index.html"
+            echo "Partial cache invalidation (HTML only)"
+          fi
+
+          INVALIDATION_ID=$(aws cloudfront create-invalidation \
+            --distribution-id ${{ env.DISTRIBUTION_ID }} \
+            --paths "$PATHS" \
+            --query 'Invalidation.Id' \
+            --output text)
+
+          echo "Invalidation ID: $INVALIDATION_ID"
+          echo "invalidation_id=$INVALIDATION_ID" >> $GITHUB_OUTPUT
+
+      # Wait for invalidation to complete
+      - name: Wait for cache invalidation
+        run: |
+          aws cloudfront wait invalidation-completed \
+            --distribution-id ${{ env.DISTRIBUTION_ID }} \
+            --id ${{ steps.invalidate.outputs.invalidation_id }}
+          echo "✅ Cache invalidated successfully"
+
+      - name: Get website URL
+        id: get-url
+        run: echo "website_url=${{ env.WEBSITE_URL }}" >> $GITHUB_OUTPUT
+
+      - name: Deployment summary
+        run: |
+          echo "## ✅ Deployment Complete" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Property | Value |" >> $GITHUB_STEP_SUMMARY
+          echo "| --- | --- |" >> $GITHUB_STEP_SUMMARY
+          echo "| Environment | ${{ github.event.inputs.environment || 'production' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Bucket | ${{ env.BUCKET_NAME }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Distribution | ${{ env.DISTRIBUTION_ID }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| URL | ${{ env.WEBSITE_URL }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Commit | ${{ github.sha }} |" >> $GITHUB_STEP_SUMMARY
+
+  # ----------------------------------------------------------
+  # JOB 3: Smoke Test (post-deploy)
+  # ----------------------------------------------------------
+  smoke-test:
+    name: Smoke Test
+    runs-on: ubuntu-latest
+    needs: deploy
+    steps:
+      - name: Test website is reachable
+        run: |
+          ENVIRONMENT="${{ github.event.inputs.environment || 'production' }}"
+          if [ "$ENVIRONMENT" = "staging" ]; then
+            URL="https://staging.claricito.com"
+          else
+            URL="https://claricito.com"
+          fi
+
+          echo "Testing $URL..."
+          HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" "$URL" --max-time 15)
+
+          if [ "$HTTP_STATUS" = "200" ]; then
+            echo "✅ Website returned HTTP 200"
+          else
+            echo "⚠️ Website returned HTTP $HTTP_STATUS"
+            # Non-fatal — CloudFront propagation may still be in progress
+          fi
+
+      - name: Check security headers
+        run: |
+          ENVIRONMENT="${{ github.event.inputs.environment || 'production' }}"
+          if [ "$ENVIRONMENT" = "staging" ]; then
+            URL="https://staging.claricito.com"
+          else
+            URL="https://claricito.com"
+          fi
+
+          HEADERS=$(curl -sI "$URL")
+          echo "$HEADERS"
+
+          if echo "$HEADERS" | grep -qi "strict-transport-security"; then
+            echo "✅ HSTS header present"
+          else
+            echo "⚠️ HSTS header missing"
+          fi

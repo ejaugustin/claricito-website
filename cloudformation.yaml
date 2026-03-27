@@ -1,0 +1,354 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: >
+  Claricito Marketing Website
+  Hosted on S3 + CloudFront with HTTPS, custom domain support,
+  and automated cache invalidation via CodePipeline.
+
+# ============================================================
+# PARAMETERS
+# ============================================================
+Parameters:
+
+  DomainName:
+    Type: String
+    Default: claricito.com
+    Description: Your root domain name (must be in Route 53 or DNS managed separately)
+
+  SubDomain:
+    Type: String
+    Default: www
+    Description: Subdomain prefix (www recommended)
+
+  AcmCertificateArn:
+    Type: String
+    Default: ''
+    Description: >
+      ARN of your ACM certificate in us-east-1 (required for CloudFront HTTPS).
+      Leave blank to deploy without a custom domain initially.
+
+  PriceClass:
+    Type: String
+    Default: PriceClass_100
+    AllowedValues:
+      - PriceClass_100
+      - PriceClass_200
+      - PriceClass_All
+    Description: CloudFront price class (100 = US/Canada/Europe, best for starting out)
+
+  Environment:
+    Type: String
+    Default: production
+    AllowedValues: [production, staging]
+
+# ============================================================
+# CONDITIONS
+# ============================================================
+Conditions:
+  HasCustomDomain: !Not [!Equals [!Ref AcmCertificateArn, '']]
+
+# ============================================================
+# RESOURCES
+# ============================================================
+Resources:
+
+  # ----------------------------------------------------------
+  # S3 BUCKET — Website Content
+  # ----------------------------------------------------------
+  WebsiteBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub claricito-website-${Environment}
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      VersioningConfiguration:
+        Status: Enabled
+      LifecycleConfiguration:
+        Rules:
+          - Id: DeleteOldVersions
+            Status: Enabled
+            NoncurrentVersionExpirationInDays: 30
+      Tags:
+        - Key: Project
+          Value: Claricito
+        - Key: Environment
+          Value: !Ref Environment
+
+  # ----------------------------------------------------------
+  # S3 BUCKET POLICY — CloudFront OAC access only
+  # ----------------------------------------------------------
+  WebsiteBucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref WebsiteBucket
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Sid: AllowCloudFrontAccess
+            Effect: Allow
+            Principal:
+              Service: cloudfront.amazonaws.com
+            Action: s3:GetObject
+            Resource: !Sub arn:aws:s3:::${WebsiteBucket}/*
+            Condition:
+              StringEquals:
+                AWS:SourceArn: !Sub arn:aws:cloudfront::${AWS::AccountId}:distribution/${CloudFrontDistribution}
+
+  # ----------------------------------------------------------
+  # CLOUDFRONT ORIGIN ACCESS CONTROL
+  # ----------------------------------------------------------
+  OriginAccessControl:
+    Type: AWS::CloudFront::OriginAccessControl
+    Properties:
+      OriginAccessControlConfig:
+        Name: !Sub claricito-website-oac-${Environment}
+        OriginAccessControlOriginType: s3
+        SigningBehavior: always
+        SigningProtocol: sigv4
+
+  # ----------------------------------------------------------
+  # CLOUDFRONT RESPONSE HEADERS POLICY — Security headers
+  # ----------------------------------------------------------
+  SecurityHeadersPolicy:
+    Type: AWS::CloudFront::ResponseHeadersPolicy
+    Properties:
+      ResponseHeadersPolicyConfig:
+        Name: !Sub claricito-security-headers-${Environment}
+        SecurityHeadersConfig:
+          StrictTransportSecurity:
+            AccessControlMaxAgeSec: 31536000
+            IncludeSubdomains: true
+            Preload: true
+            Override: true
+          ContentTypeOptions:
+            Override: true
+          FrameOptions:
+            FrameOption: DENY
+            Override: true
+          XSSProtection:
+            ModeBlock: true
+            Protection: true
+            Override: true
+          ReferrerPolicy:
+            ReferrerPolicy: strict-origin-when-cross-origin
+            Override: true
+        CustomHeadersConfig:
+          Items:
+            - Header: Cache-Control
+              Value: public, max-age=31536000, immutable
+              Override: false
+        CorsConfig:
+          AccessControlAllowCredentials: false
+          AccessControlAllowHeaders:
+            Items: ['*']
+          AccessControlAllowMethods:
+            Items: [GET, HEAD]
+          AccessControlAllowOrigins:
+            Items:
+              - !Sub https://${DomainName}
+              - !Sub https://${SubDomain}.${DomainName}
+          OriginOverride: false
+
+  # ----------------------------------------------------------
+  # CLOUDFRONT CACHE POLICY — Optimized for static sites
+  # ----------------------------------------------------------
+  CachePolicy:
+    Type: AWS::CloudFront::CachePolicy
+    Properties:
+      CachePolicyConfig:
+        Name: !Sub claricito-cache-policy-${Environment}
+        DefaultTTL: 86400     # 1 day
+        MinTTL: 0
+        MaxTTL: 31536000      # 1 year
+        ParametersInCacheKeyAndForwardedToOrigin:
+          CookiesConfig:
+            CookieBehavior: none
+          EnableAcceptEncodingBrotli: true
+          EnableAcceptEncodingGzip: true
+          HeadersConfig:
+            HeaderBehavior: none
+          QueryStringsConfig:
+            QueryStringBehavior: none
+
+  # ----------------------------------------------------------
+  # CLOUDFRONT DISTRIBUTION
+  # ----------------------------------------------------------
+  CloudFrontDistribution:
+    Type: AWS::CloudFront::Distribution
+    Properties:
+      DistributionConfig:
+        Enabled: true
+        Comment: !Sub Claricito Marketing Website (${Environment})
+        DefaultRootObject: index.html
+        HttpVersion: http2and3
+        IPV6Enabled: true
+        PriceClass: !Ref PriceClass
+
+        # Custom domain config (only when certificate is provided)
+        Aliases: !If
+          - HasCustomDomain
+          - - !Ref DomainName
+            - !Sub ${SubDomain}.${DomainName}
+          - !Ref AWS::NoValue
+
+        ViewerCertificate: !If
+          - HasCustomDomain
+          - AcmCertificateArn: !Ref AcmCertificateArn
+            SslSupportMethod: sni-only
+            MinimumProtocolVersion: TLSv1.2_2021
+          - CloudFrontDefaultCertificate: true
+
+        Origins:
+          - Id: S3Origin
+            DomainName: !GetAtt WebsiteBucket.RegionalDomainName
+            S3OriginConfig:
+              OriginAccessIdentity: ''
+            OriginAccessControlId: !GetAtt OriginAccessControl.Id
+
+        DefaultCacheBehavior:
+          TargetOriginId: S3Origin
+          ViewerProtocolPolicy: redirect-to-https
+          CachePolicyId: !Ref CachePolicy
+          ResponseHeadersPolicyId: !Ref SecurityHeadersPolicy
+          Compress: true
+          AllowedMethods: [GET, HEAD, OPTIONS]
+          CachedMethods: [GET, HEAD]
+
+        # Special cache behaviors for HTML files (shorter TTL)
+        CacheBehaviors:
+          - PathPattern: '*.html'
+            TargetOriginId: S3Origin
+            ViewerProtocolPolicy: redirect-to-https
+            CachePolicyId: !Ref CachePolicy
+            ResponseHeadersPolicyId: !Ref SecurityHeadersPolicy
+            Compress: true
+            AllowedMethods: [GET, HEAD]
+            DefaultTTL: 300          # 5 min for HTML — quick deploys
+            MinTTL: 0
+            MaxTTL: 3600
+
+        # SPA error handling — redirect 403/404 to index.html
+        CustomErrorResponses:
+          - ErrorCode: 403
+            ResponseCode: 200
+            ResponsePagePath: /index.html
+            ErrorCachingMinTTL: 0
+          - ErrorCode: 404
+            ResponseCode: 200
+            ResponsePagePath: /index.html
+            ErrorCachingMinTTL: 0
+
+        Logging:
+          Bucket: !GetAtt LogsBucket.DomainName
+          IncludeCookies: false
+          Prefix: cloudfront/
+
+      Tags:
+        - Key: Project
+          Value: Claricito
+        - Key: Environment
+          Value: !Ref Environment
+
+  # ----------------------------------------------------------
+  # S3 BUCKET — Access logs
+  # ----------------------------------------------------------
+  LogsBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub claricito-website-logs-${Environment}
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      OwnershipControls:
+        Rules:
+          - ObjectOwnership: BucketOwnerPreferred
+      LifecycleConfiguration:
+        Rules:
+          - Id: DeleteOldLogs
+            Status: Enabled
+            ExpirationInDays: 90
+
+  # ----------------------------------------------------------
+  # IAM ROLE — CI/CD Deploy Role (GitHub Actions / CodePipeline)
+  # ----------------------------------------------------------
+  DeployRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub claricito-website-deploy-${Environment}
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: codebuild.amazonaws.com
+            Action: sts:AssumeRole
+          - Effect: Allow
+            Principal:
+              Federated: !Sub arn:aws:iam::${AWS::AccountId}:oidc-provider/token.actions.githubusercontent.com
+            Action: sts:AssumeRoleWithWebIdentity
+            Condition:
+              StringLike:
+                token.actions.githubusercontent.com:sub: repo:ejaugustin/claricito-website:*
+      Policies:
+        - PolicyName: WebsiteDeployPolicy
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Sid: S3Sync
+                Effect: Allow
+                Action:
+                  - s3:PutObject
+                  - s3:GetObject
+                  - s3:DeleteObject
+                  - s3:ListBucket
+                Resource:
+                  - !GetAtt WebsiteBucket.Arn
+                  - !Sub ${WebsiteBucket.Arn}/*
+              - Sid: CloudFrontInvalidation
+                Effect: Allow
+                Action:
+                  - cloudfront:CreateInvalidation
+                  - cloudfront:GetInvalidation
+                Resource: !Sub arn:aws:cloudfront::${AWS::AccountId}:distribution/${CloudFrontDistribution}
+
+# ============================================================
+# OUTPUTS
+# ============================================================
+Outputs:
+
+  WebsiteBucketName:
+    Description: S3 bucket name for website files
+    Value: !Ref WebsiteBucket
+    Export:
+      Name: !Sub ${AWS::StackName}-WebsiteBucket
+
+  CloudFrontDistributionId:
+    Description: CloudFront Distribution ID (used for cache invalidation)
+    Value: !Ref CloudFrontDistribution
+    Export:
+      Name: !Sub ${AWS::StackName}-DistributionId
+
+  CloudFrontDomain:
+    Description: CloudFront domain name (use this for DNS CNAME)
+    Value: !GetAtt CloudFrontDistribution.DomainName
+    Export:
+      Name: !Sub ${AWS::StackName}-CloudFrontDomain
+
+  WebsiteURL:
+    Description: Website URL
+    Value: !If
+      - HasCustomDomain
+      - !Sub https://${SubDomain}.${DomainName}
+      - !Sub https://${CloudFrontDistribution.DomainName}
+    Export:
+      Name: !Sub ${AWS::StackName}-WebsiteURL
+
+  DeployRoleArn:
+    Description: IAM Role ARN for CI/CD deployments
+    Value: !GetAtt DeployRole.Arn
+    Export:
+      Name: !Sub ${AWS::StackName}-DeployRoleArn
