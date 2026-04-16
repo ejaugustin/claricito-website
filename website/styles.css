@@ -446,6 +446,9 @@ input, button { font-family: inherit; }
   grid-column: span 2;
   background: linear-gradient(135deg, #121212 0%, #0f0f0f 100%);
 }
+.feature-card[data-feature="relationship"] {
+  grid-column: 1 / -1;
+}
 .feature-icon {
   font-size: 1.8rem;
   color: var(--gold);
