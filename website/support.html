@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Support — Claricito</title>
+  <meta name="description" content="Get help with Claricito. Contact our support team, find answers to common questions, and access crisis resources." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="pages.css" />
+  <link rel="icon" type="image/png" href="favicon.png" />
+  <link rel="apple-touch-icon" href="favicon.png" />
+</head>
+<body>
+
+  <!-- NAV -->
+  <nav class="nav scrolled" id="nav">
+    <div class="nav-inner">
+      <a href="index.html" class="nav-logo">
+        <img src="logo.png" alt="Claricito" class="nav-logo-img" />
+        <span class="logo-text">Claricito</span>
+      </a>
+      <ul class="nav-links">
+        <li><a href="index.html#features">Features</a></li>
+        <li><a href="index.html#clari">Meet Clari</a></li>
+        <li><a href="about.html">About</a></li>
+        <li><a href="philosophy.html">Philosophy</a></li>
+        <li><a href="privacy.html">Privacy</a></li>
+      </ul>
+      <a href="https://apps.apple.com/us/app/claricito/id6762101367" target="_blank" rel="noopener noreferrer" class="nav-cta">Download Free</a>
+      <button class="nav-hamburger" id="hamburger" aria-label="Menu">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- MOBILE MENU -->
+  <div class="mobile-menu" id="mobileMenu">
+    <ul>
+      <li><a href="index.html#features" onclick="closeMobile()">Features</a></li>
+      <li><a href="index.html#clari" onclick="closeMobile()">Meet Clari</a></li>
+      <li><a href="about.html" onclick="closeMobile()">About</a></li>
+      <li><a href="philosophy.html" onclick="closeMobile()">Philosophy</a></li>
+      <li><a href="privacy.html" onclick="closeMobile()">Privacy</a></li>
+      <li><a href="https://apps.apple.com/us/app/claricito/id6762101367" target="_blank" rel="noopener noreferrer" class="mobile-cta">Download Free</a></li>
+    </ul>
+  </div>
+
+  <!-- PAGE HERO -->
+  <section class="page-hero page-hero-legal">
+    <div class="page-hero-bg">
+      <div class="orb orb-2"></div>
+      <div class="grain"></div>
+    </div>
+    <div class="container page-hero-content">
+      <div class="page-breadcrumb">
+        <a href="index.html">Home</a>
+        <span>→</span>
+        <span>Support</span>
+      </div>
+      <h1 class="page-title">Support</h1>
+      <p class="page-subtitle">We're here to help. Find answers, reach our team, and access emergency resources below.</p>
+    </div>
+  </section>
+
+  <!-- MAIN CONTENT -->
+  <main class="page-main">
+    <div class="container page-container-legal">
+
+      <!-- Contact -->
+      <section class="legal-section" id="contact">
+        <h2>Contact Us</h2>
+        <p>For account questions, technical issues, billing inquiries, or general feedback, email our support team:</p>
+        <p><strong><a href="mailto:support@claricito.com">support@claricito.com</a></strong></p>
+        <p>We aim to respond within one business day. Please include your registered email address and a brief description of your issue so we can assist you as quickly as possible.</p>
+      </section>
+
+      <!-- Common questions -->
+      <section class="legal-section" id="faq">
+        <h2>Common Questions</h2>
+
+        <h3>How do I cancel my subscription?</h3>
+        <p>Claricito subscriptions are managed through Apple. To cancel, open the <strong>Settings</strong> app on your iPhone → tap your Apple ID at the top → <strong>Subscriptions</strong> → select Claricito → <strong>Cancel Subscription</strong>. Cancellation takes effect at the end of your current billing period.</p>
+
+        <h3>How do I delete my account and data?</h3>
+        <p>You can request account deletion at any time from within the app: go to <strong>Settings → Privacy & Data → Delete My Account</strong>. This permanently deletes your profile, conversation history, mood logs, and all associated data. Alternatively, email <a href="mailto:support@claricito.com">support@claricito.com</a> with the subject line "Account Deletion Request" and we will process it within 30 days.</p>
+
+        <h3>What data does Claricito collect?</h3>
+        <p>Please see our <a href="privacy.html">Privacy Policy</a> for a full account of what we collect, why, and how we protect it.</p>
+
+        <h3>Is Clari a real therapist?</h3>
+        <p>No. Clari is an AI companion designed to support self-reflection and emotional awareness. Claricito is not a clinical service and is not a substitute for professional mental health care. If you are experiencing a mental health crisis, please use the crisis resources below.</p>
+
+        <h3>How do I report a bug or give feedback?</h3>
+        <p>Email <a href="mailto:support@claricito.com">support@claricito.com</a> with a description of the issue, your device model, and iOS version. Screenshots are always helpful.</p>
+      </section>
+
+      <!-- Crisis resources -->
+      <section class="legal-section" id="crisis">
+        <h2>Crisis Resources</h2>
+        <p>Claricito is a companion app — it is not a crisis service. If you or someone you know is in immediate danger or experiencing a mental health emergency, please reach out to one of the following:</p>
+
+        <div class="legal-box" style="border-color: rgba(255,107,107,0.35); background: rgba(255,107,107,0.05);">
+          <p><strong>988 Suicide &amp; Crisis Lifeline</strong><br />
+          Call or text <a href="tel:988"><strong>988</strong></a> — available 24/7 in the US</p>
+
+          <p><strong>Crisis Text Line</strong><br />
+          Text <strong>HOME</strong> to <a href="sms:741741"><strong>741741</strong></a> — available 24/7 in the US</p>
+
+          <p><strong>Emergency Services</strong><br />
+          Call <a href="tel:911"><strong>911</strong></a> (US) or your local emergency number for immediate danger</p>
+
+          <p><strong>International Association for Suicide Prevention</strong><br />
+          <a href="https://www.iasp.info/resources/Crisis_Centres/" target="_blank" rel="noopener noreferrer">Crisis centre directory by country</a></p>
+        </div>
+      </section>
+
+      <!-- Privacy & Terms links -->
+      <section class="legal-section" id="legal">
+        <h2>Legal</h2>
+        <p>
+          <a href="privacy.html">Privacy Policy</a> &nbsp;·&nbsp;
+          <a href="terms.html">Terms of Service</a>
+        </p>
+        <p>Claricito is a product of mobiventa LLC. &copy; <span id="footer-year">2025</span> Claricito. All rights reserved.</p>
+      </section>
+
+    </div>
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-col footer-brand-col">
+          <a href="index.html" class="footer-logo">
+            <img src="logo.png" alt="Claricito" class="footer-logo-img" />
+            <span class="logo-text">Claricito</span>
+          </a>
+          <p class="footer-tagline-sub">Know yourself. Grow your world.</p>
+        </div>
+        <div class="footer-col">
+          <h5>Product</h5>
+          <ul>
+            <li><a href="index.html#features">Features</a></li>
+            <li><a href="index.html#clari">Meet Clari</a></li>
+            <li><a href="https://apps.apple.com/us/app/claricito/id6762101367" target="_blank" rel="noopener noreferrer">Download Free</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h5>Support &amp; Community</h5>
+          <ul>
+            <li><a href="support.html">Help &amp; Support</a></li>
+            <li><a href="https://apps.apple.com/us/app/claricito/id6762101367" target="_blank" rel="noopener noreferrer">Download Free</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h5>Company</h5>
+          <ul>
+            <li><a href="about.html">About</a></li>
+            <li><a href="philosophy.html">Our Philosophy</a></li>
+            <li><a href="privacy.html">Privacy</a></li>
+            <li><a href="terms.html">Terms</a></li>
+            <li><a href="support.html">Support</a></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>&copy; <span id="copyright-year">2025</span> Claricito. All rights reserved.
+        Claricito is the property of mobiventa LLC, <a href="https://mobiventa.com" target="_blank" rel="noopener noreferrer" class="footer-legal-link">mobiventa.com</a></p>
+      <p class="footer-tagline">Know yourself. Grow your world.</p>
+    </div>
+  </footer>
+
+  <script src="pages.js"></script>
+  <script>
+    // Update copyright year
+    const y = new Date().getFullYear();
+    document.querySelectorAll('#copyright-year, #footer-year').forEach(el => el.textContent = y);
+  </script>
+</body>
+</html>
